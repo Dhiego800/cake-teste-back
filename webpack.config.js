@@ -1,53 +1,58 @@
-const HTMLWebpackPlugin = require('html-webpack-plugin');
-const path = require ('path');
-const PUBLIC_DIR = 'views';
-const webpack = require('webpack');
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+const Dir = 'dist'
 
 module.exports = {
-  devServer: {
-    contentBase: path.join(__dirname, PUBLIC_DIR),
-    hot: true,
-    port: 3340
+  entry: './src/js/index.js',
+  output: {
+    filename: 'main.js',
+    path: path.resolve(__dirname, Dir),
   },
-  entry: path.resolve(__dirname, 'src/js', 'script.js'),
-  mode: 'development',
   module: {
     rules: [
       {
-        exclude: /node_modules/,
-        loader: 'babel-loader',
-        query: {
-          presets: [
-            'babel-preset-env'
-          ]
-        },
-        test: /\.js$/
-      },
-      {
-        exclude: /node_modules/,
-        test: /\.css/,
+        test: /\.(sa|sc|c)ss$/,
         use: [
-          { loader: 'style-loader' },
-          {
-            loader: 'css-loader',
-            options: {
-              modules: true,
-            }
-          }
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'sass-loader'
         ]
       },
-            
+      {
+        test: /\.css$/i,
+        use: [
+          'style-loader',
+          'css-loader'
+        ]
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['babel-preset-env']
+          }
+        }
+      },
+      {
+        test: /\.(jpe?g|png|gif|svg)$/i,
+        loader: 'file-loader',
+        options: {
+          name: '[name].[ext]',
+        }
+      }
     ]
   },
-  output: {
-    filename: '[name]-[hash].js',
-    path: path.resolve(__dirname, 'build'),
-  },
   plugins: [
-    new HTMLWebpackPlugin({
-      template: path.resolve(__dirname, PUBLIC_DIR, 'index.html')
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: './views/index.html'
     }),
-    new webpack.HotModuleReplacementPlugin()
-  ],
-  target: 'web'
-};
+    new MiniCssExtractPlugin({
+      filename: 'style.css',      
+    }),
+  ]
+}
